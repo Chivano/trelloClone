@@ -9,19 +9,9 @@ const style = {
     flexDirection : "row"
 }
 
-const inactive = {
-    border : "solid",
-    width : "80%",
-    height: "10%",
-    margin : "1%"
-}
-
-const active = {
-    border : "solid",
-    backgroundColor : "black",
-    width : "80%",
-    height: "10%",
-    margin : "1%"
+const header = {
+    display:"flex",
+    flexDirection : "row"
 }
 
 var toDo = [];
@@ -39,149 +29,172 @@ export default class App extends React.Component {
             finished : [],
             allowedActive : true,
             activeCard : null,
-            style : "inactive",
+            text : [],
             activeCardContainer : "toDo"
         }
         
     }
 
+    getCardsContainer (cardId){
+        if(this.state.inProgress.indexOf(cardId)!= -1){
+            return "inProgress"
+        }
+        else if(this.state.toDo.indexOf(cardId) != -1){
+            return "toDo"
+        }
+        else if(this.state.finished.indexOf(cardId) != -1) {
+            return "finished"
+        }
+        else {
+            return "toDo"
+        }
+    }
 
-    setActive(clickedCard) {
-        var activeCard;
-        if(!this.state.activeCard){
-            if(clickedCard.state.style == "inactive"){
-                clickedCard.setState(function(x){
-                    return {style : "active"}
-                })
-                this.setState(function(){
-                    return activeCard = true
-                })
-            }else {
-                clickedCard.setState(function(x){
-                    return {style : "inactive"}
-                })
-            }
-    
-            if(this.state.inProgress.filter((card) => card.props.id == clickedCard.props.id).length > 0){
-                this.setState({ 
-                    activeCard : this.state.inProgress.filter((card) => card.props.id == clickedCard.props.id),
-                    activeCardContainer : "inProgress",
-                    allowedActive : false      
-                }, () => {
-                    console.log(this.state,"THISSTATE")
-                    }); 
-            }
-            if(this.state.toDo.filter((card) => card.props.id == clickedCard.props.id).length > 0){
-                console.log("HERERERE")
-                this.setState({ 
-                    activeCard : this.state.toDo.filter((card) => card.props.id == clickedCard.props.id),
-                    activeCardContainer : "toDo",
-                    allowedActive : false      
-                }, () => {
-                    console.log(this.state,"THISSTATE")
-                    }); 
-            }
-            if(this.state.finished.filter((card) => card.props.id == clickedCard.props.id).length > 0){
-                this.setState({ 
-                    activeCard : this.state.finished.filter((card) => card.props.id == clickedCard.props.id),
-                    activeCardContainer : "finished",
-                    allowedActive : false      
-                }, () => {
-                    console.log(this.state,"THISSTATE")
-                    }); 
-    
-            }
+    setCardActive (cardClicked) {
+        var cardContainer = this.getCardsContainer(cardClicked.props.id)
+
+        if(cardClicked.props.activeId != null){
+            this.setState(()=>{
+                return {
+                    activeCard : null,
+                    activeCardContainer : cardContainer
+                }
+            })
+        }
+        else {
+            this.setState(()=>{
+                return {activeCard : cardClicked.props.id, activeCardContainer : cardContainer}
+            })
         }
         
-    
     }
 
-    addCard() {
-        ids.push(ids[ids.length -1] + 1)
-        toDo.push(<Card style={this.state.style}  id={ids[ids.length-1]} setActive={this.setActive.bind(this)}/>)
-        this.setState(prevState =>({
-            toDo : toDo
-        }))
-    }
+    setText (changedText,id) {
+            
+        var textToChange = this.state.text[id];
+            var textArray = this.state.text;
+            textArray[id] = changedText 
 
-    findIndexOfActiveCard (toDoToMove, id) {
-        if(id == "toDo"){
-            console.log(toDoToMove,"toDoToMove")
-            return this.state.toDo.map((card)=>{
-                return card.props.id
-            }).indexOf(toDoToMove[0].props.id)
-        }
-        if(id == "inProgress"){
-            return this.state.inProgress.map((card)=>{
-                return card.props.id
-            }).indexOf(toDoToMove[0].props.id)
-        }
+            this.setState((prevState)=>{
+                return {text :textArray}
+            });
 
-        if(id == "finished"){
-            return this.state.finished.map((card)=>{
-                return card.props.id
-            }).indexOf(toDoToMove[0].props.id)
-        }
        
     }
 
-    moveCard (id){
-        if(id != this.state.activeCardContainer && this.state.activeCard){
-            var cardToMove = this.state.activeCard
-            if(id == "inProgress"){
-                this.state[this.state.activeCardContainer].splice(this.findIndexOfActiveCard(cardToMove, this.state.activeCardContainer),1)
-               
-                this.setState(function(prevState, props) { 
-                    return {
-                        inProgress: this.state.inProgress.concat(cardToMove),
-                        toDo : this.state.toDo,
-                        finished : this.state.finished,
-                        activeCard : null
-                    };
+    addCard () {
+        this.setState((prevState) => {
+            return {
+                toDo : prevState.toDo.length != 0 ? prevState.toDo.concat(prevState.toDo[prevState.toDo.length -1]+1) : prevState.toDo.concat(0),
+                text : prevState.text.concat("")
+            }
+        });
+    }
+
+    moveCard (clickedCardContainer) {
+
+        var indexOfElement = this.state[this.state.activeCardContainer].indexOf(this.state.activeCard) 
+
+        if(indexOfElement == -1){
+            return
+        }
+
+        var activeCardContainerName = this.state.activeCardContainer;
+        var activeArray = this.state[activeCardContainerName];
+        activeArray.splice(indexOfElement,1)
+        
+        this.setState((prevState)=>{
+            return {[prevState.activeCardContainer] : activeArray}
+        })
+        
+        
+        var id = clickedCardContainer.props.id;
+
+        switch(id){
+            case "toDo" : {
+                this.setState((prevState)=>{
+                    return{
+                        toDo : prevState.toDo.concat(prevState.activeCard),   
+                        activeCardContainer : "toDo"
+                    }
                 });
             }
-            if(id == "toDo"){
-                this.state[this.state.activeCardContainer].splice(this.findIndexOfActiveCard(cardToMove, this.state.activeCardContainer),1)
-                this.setState(function(prevState, props) { 
-                    return {
-                        toDo: this.state.toDo.concat(cardToMove),
-                        inProgress: this.state.inProgress,
-                        finished : this.state.finished,
-                        activeCard : null
-                    };
-                });
+            break;
+            case "inProgress" : {
+                this.setState((prevState)=>{
+                    return{
+                        inProgress : prevState.inProgress.concat(prevState.activeCard),
+                        activeCardContainer : "inProgress"
+                    }
+                },function(){
+                    console.log(this.state,"thisstateafterupdate")
+                })
             }
-            if(id == "finished"){
-                this.state[this.state.activeCardContainer].splice(this.findIndexOfActiveCard(cardToMove, this.state.activeCardContainer),1)
-                this.setState(function(prevState, props) { 
-                    return {
-                        toDo: this.state.toDo,
-                        inProgress: this.state.inProgress,
-                        finished : this.state.finished.concat(cardToMove),
-                        activeCard : null
-                    };
-                });
-            }  
+            break;
+            case "finished" : {
+            this.setState((prevState)=>{
+                return{
+                    finished : prevState.finished.concat(prevState.activeCard),
+                    activeCardContainer : "finished"
+                }
+            })
+            break;
+            }
         }
     }
 
+    deleteCard () {
+
+       var updatedArray = this.state[this.state.activeCardContainer].filter((card)=>{
+           return card != this.state.activeCard 
+       })
+       var updatedTextArray = this.state.text;
+       updatedTextArray.splice(this.state.activeCard,1)
+
+
+       this.setState((prevState)=>{
+           return {
+               [this.state.activeCardContainer]: updatedArray,
+               text : updatedTextArray
+        }
+       })
+    }
+
+    renderCards () {
+        return this.state.toDo.map((id)=> {
+            return(<Card setText={this.setText.bind(this)} setCardActive={this.setCardActive.bind(this)} text={this.state.text[id]} activeId={this.state.activeCard} key={id} id={id}/>)
+        })
+    }
+
+    renderInProgress () {
+        return this.state.inProgress.map((id)=> {
+            return(<Card setText={this.setText.bind(this)} setCardActive={this.setCardActive.bind(this)} text={this.state.text[id]} activeId={this.state.activeCard} key={id} id={id}/>)
+        })
+    }
+    renderFinished() {
+        return this.state.finished.map((id)=> {
+            return(<Card setText={this.setText.bind(this)} setCardActive={this.setCardActive.bind(this)} text={this.state.text[id]} activeId={this.state.activeCard} key={id} id={id}/>)
+        })
+    }
+ 
     render () {
         return (
             <div>
                 <div>
                   <div>
                       <button onClick={this.addCard.bind(this)}>Add Item</button>
+                      <button onClick={this.deleteCard.bind(this)}>Delete item</button>
                   </div>
                 </div>
-                <div style={style}>
-                <CardContainer id="toDo" moveCard={this.moveCard.bind(this)} >
-                {this.state.toDo}
+                <div style={style}> 
+                <CardContainer title="Todo" moveCard={this.moveCard.bind(this)} id="toDo">
+                {this.renderCards()}  
                 </CardContainer>
-                <CardContainer id="inProgress" moveCard={this.moveCard.bind(this)}>
-                {this.state.inProgress}
+                <CardContainer title="In progress" moveCard={this.moveCard.bind(this)} id="inProgress">
+                {this.renderInProgress()}  
                 </CardContainer>
-                <CardContainer id="finished" moveCard={this.moveCard.bind(this)}>
-                {this.state.finished}
+                <CardContainer title="Finished" moveCard={this.moveCard.bind(this)} id="finished">
+                {this.renderFinished()} 
                 </CardContainer>
                 </div>
             </div>)

@@ -3,13 +3,19 @@ import ReactDOM from 'react-dom'
 import Card from './Card'
 
 
-const styles = {
-    border : "solid",
+const componentRoot = {
     width : "20%",
     height: "70%",
     margin : "1%",
     display:"flex",
     flexDirection : "column"
+}
+
+const container = {
+    width : "100%",
+    margin : "1%",
+    height: "70%",
+    border : "solid",
 }
 
 
@@ -21,8 +27,11 @@ export default class CardContainer extends React.Component {
 
     render () {
         return (
-            <div onClick={()=>this.props.moveCard(this.props.id)} style={styles}>
-            {this.props.children}
+            <div style={componentRoot}>
+                <div>{this.props.title}</div>
+                    <div style={container} onClick={()=>this.props.moveCard(this)} >
+                    {this.props.children}
+                </div>
         </div>)
     }
 }
