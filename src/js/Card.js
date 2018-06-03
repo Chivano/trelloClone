@@ -2,20 +2,26 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import CardContainer from './CardContainer';
 
+
 const inactive = {
     border : "solid",
-    width : "80%",
+    width : "90%",
     height: "10%",
-    margin : "1%",
+    margin: "5 auto",
+    borderRadius : "10px",
+    backgroundImage: "url('/pictures/wood_04_hd_picture_168501.jpg')",
+    backgroundRepeat: "repeat-x",
     cursor: "pointer"
 }
 
 const active = {
     border : "solid",
     borderColor : "coral",
-    width : "80%",
+    width : "90%",
     height: "10%",
-    margin : "1%",
+    margin: "5 auto",
+    backgroundImage: "url('/pictures/wood_04_hd_picture_168501.jpg')",
+    borderRadius : "10px",
     cursor: "pointer"
 }
 

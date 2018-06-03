@@ -6,17 +6,21 @@ import Card from './Card'
 
 const style = {
     display:"flex",
+    height : "100%",
+    backgroundColor : "#993300",
     flexDirection : "row"
 }
 
 const header = {
     display:"flex",
+    backgroundColor : "#993300",
     flexDirection : "row"
 }
 
 var toDo = [];
 var keys = [0];
 var ids = [-1]
+var blob = null;
 
 
 export default class App extends React.Component {
@@ -35,6 +39,27 @@ export default class App extends React.Component {
         
     }
 
+    loadState (e) {
+        var file = e.target.files[0];
+        console.log(file,"file")
+        var reader = new FileReader();
+        reader.addEventListener("loadend", function() {
+            this.setState((prevState) => {
+                return JSON.parse(reader.result)
+            }, console.log(this.state,"thisState"));
+        }.bind(this));
+        reader.readAsText(file);
+    }
+
+    saveState () {
+        blob = new Blob([JSON.stringify(this.state)], {type : 'application/json'});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "state";
+        a.click();
+    }
+
     getCardsContainer (cardId){
         if(this.state.inProgress.indexOf(cardId)!= -1){
             return "inProgress"
@@ -51,19 +76,22 @@ export default class App extends React.Component {
     }
 
     setCardActive (cardClicked) {
+        
         var cardContainer = this.getCardsContainer(cardClicked.props.id)
 
-        if(cardClicked.props.activeId != null){
+        if(this.state.activeCard != cardClicked.props.id){
             this.setState(()=>{
                 return {
-                    activeCard : null,
+                    activeCard : cardClicked.props.id,
                     activeCardContainer : cardContainer
                 }
             })
         }
         else {
             this.setState(()=>{
-                return {activeCard : cardClicked.props.id, activeCardContainer : cardContainer}
+                return {
+                    activeCard : null, 
+                    activeCardContainer : cardContainer}
             })
         }
         
@@ -179,11 +207,13 @@ export default class App extends React.Component {
  
     render () {
         return (
-            <div>
+            <div style={{  height : "100%"}}>
                 <div>
                   <div>
                       <button onClick={this.addCard.bind(this)}>Add Item</button>
                       <button onClick={this.deleteCard.bind(this)}>Delete item</button>
+                      <button onClick={this.saveState.bind(this)}>Save to file</button>
+                      <input onChange={this.loadState.bind(this)} name="myFile" type="file"/>
                   </div>
                 </div>
                 <div style={style}> 
