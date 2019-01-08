@@ -40,6 +40,7 @@ export default class App extends React.Component {
     }
 
     loadState (e) {
+        var OompaLoompa = [];
         var file = e.target.files[0];
         console.log(file,"file")
         var reader = new FileReader();
