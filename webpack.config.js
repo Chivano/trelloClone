@@ -27,3 +27,4 @@ module.exports = {
         filename: 'my-first-webpack.bundle.js'
       }
   };
+Hello
